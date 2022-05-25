@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    {% load static %}
+    <script type="text/javascript" src="{% static 'functions.js' %}"></script>
+</head>
+<body>
+    <button onclick="test('{{csrf_token}}')">Test</button>
+</body>
+</html>

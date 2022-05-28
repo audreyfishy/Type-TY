@@ -1,12 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from testApp.functions import functions as f
+import asyncio as a
 
 def index(request):
     return render(request, 'index.html')
 
 def form(request):
-    print("saki")
-    f.main("UCl79rcNN4Nxps7I0d-iXJpQ")
-    print("ato")
+    a.run(f.process())
     return HttpResponse()

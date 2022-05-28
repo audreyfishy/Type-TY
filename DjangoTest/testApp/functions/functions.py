@@ -1,9 +1,5 @@
-from curses.ascii import NUL
+from pyppeteer import launch
 from requests_html import AsyncHTMLSession
-
-# Run functions to initialize ==================================================
-
-# ==============================================================================
 
 # Set the global variables =====================================================
 odoritora = "UCl79rcNN4Nxps7I0d-iXJpQ"
@@ -33,17 +29,18 @@ async def process(id=odoritora):
         await r.html.page.evaluate(loadMoreScript)
     def getVideoListURL(id):
         return f"https://jp.noxinfluencer.com/youtube/channel/{id}?tab=videos"
-    print("--- Start ---")
     assesion = AsyncHTMLSession()
-    print("--- Get URL ---")
+    assesion._browser = await launch({
+        'ignoreHTTPSErrors': True,
+        'headless': True,
+        'handleSIGINT': False,
+        'handleSIGTERM': False,
+        'handleSIGHUP': False
+    }, args=["--no-sandbox"])
     r = await assesion.get(getVideoListURL(id))
-    print("--- Get Data ---")
-    await r.html.arender(keep_page=True)
-    print("--- Get Yeah ---")
+    await r.html.arender(keep_page=True, timeout = 10, sleep=0.1, wait=0.1)
     rtn = await getData(r)
-    print("___ Get More ___")
     await assesion.close()
-    print("done------")
     return rtn
 
 

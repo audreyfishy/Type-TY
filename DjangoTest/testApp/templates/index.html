@@ -6,6 +6,9 @@
     <script type="text/javascript" src="{% static 'functions.js' %}"></script>
 </head>
 <body>
-    <button onclick="test('{{csrf_token}}')">Test</button>
+    <form>
+        <input type="text" id="youtubeID">
+        <button type="button" onclick="test('{{csrf_token}}')">送信</button>
+    </form>
 </body>
 </html>

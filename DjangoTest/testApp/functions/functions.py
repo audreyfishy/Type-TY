@@ -1,35 +1,52 @@
+from ast import pattern
+import enum
 from pyppeteer import launch
 from requests_html import AsyncHTMLSession
+import time
+import re
 
+# Re Compiler ==================================================================
+p = re.compile(r'https:\/\/www\.youtube\.com\/watch\?v=(.{11})')
+# ============================================================================== 
 # Set the global variables =====================================================
 odoritora = "UCl79rcNN4Nxps7I0d-iXJpQ"
 # ==============================================================================
+async def getData(r):
+    getDataScript = """
+    () => {
+        let arr = document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer");
+        rtn = [];
+        for(let e of arr){
+            rtn.push(e.href);
+        }
+        return {"data": rtn};
+    }
+    """
+    return (await r.html.page.evaluate(getDataScript))["data"] 
+
+async def loadMore(r):
+    loadMoreScript = """
+        async function(){
+            const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            let btn = document.querySelector("#btn-load-more-video");
+            btn.click();
+        }
+        """ 
+    await r.html.page.evaluate(loadMoreScript)
+
+def getVideoListURL(id):
+    return f"https://www.youtube.com/channel/{id}/videos"
+
+def getVideoOriginalURL(temp : str):
+    try:
+        return p.match(temp).groups()[0]
+    except:
+        print(f"{temp} is not a valid URL")
+        return -1
 
 async def process(id=odoritora):
-    async def getData(r):
-        getDataScript = """
-        () => {
-            let arr = document.getElementsByClassName("video-item");
-            rtn = [];
-            for(let e of arr){
-                rtn.push(e.childNodes[0].getAttribute("data-video-id"));
-            }
-            return {"data": rtn};
-        }
-        """
-        return (await r.html.page.evaluate(getDataScript))["data"] 
-    async def loadMore(r):
-        loadMoreScript = """
-            async function(){
-                const _sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-                let btn = document.querySelector("#btn-load-more-video");
-                btn.click();
-            }
-            """ 
-        await r.html.page.evaluate(loadMoreScript)
-    def getVideoListURL(id):
-        return f"https://jp.noxinfluencer.com/youtube/channel/{id}?tab=videos"
     assesion = AsyncHTMLSession()
+    assesion.loop.set_debug(True)
     assesion._browser = await launch({
         'ignoreHTTPSErrors': True,
         'headless': True,
@@ -38,8 +55,11 @@ async def process(id=odoritora):
         'handleSIGHUP': False
     }, args=["--no-sandbox"])
     r = await assesion.get(getVideoListURL(id))
-    await r.html.arender(keep_page=True, timeout = 10, sleep=0.1, wait=0.1)
+    await r.html.arender(keep_page=True)
+    #await r.html.page.screenshot({'path': './test.png', 'fullPage': True})
     rtn = await getData(r)
+    for i, e in enumerate(rtn):
+        rtn[i] = getVideoOriginalURL(e)
     await assesion.close()
     return rtn
 

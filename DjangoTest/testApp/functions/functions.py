@@ -6,7 +6,7 @@ import time
 import re
 
 # Re Compiler ==================================================================
-p = re.compile(r'https:\/\/www\.youtube\.com\/watch\?v=(.{11})')
+p = re.compile(r'https:\/\/www\.youtube\.com\/(watch\?v=|shorts\/)(.{11})')
 # ============================================================================== 
 # Set the global variables =====================================================
 odoritora = "UCl79rcNN4Nxps7I0d-iXJpQ"
@@ -39,7 +39,7 @@ def getVideoListURL(id):
 
 def getVideoOriginalURL(temp : str):
     try:
-        return p.match(temp).groups()[0]
+        return p.match(temp).groups()[1]
     except:
         print(f"{temp} is not a valid URL")
         return -1
@@ -48,7 +48,6 @@ async def process(id=odoritora):
     assesion = AsyncHTMLSession()
     assesion.loop.set_debug(True)
     assesion._browser = await launch({
-        'ignoreHTTPSErrors': True,
         'headless': True,
         'handleSIGINT': False,
         'handleSIGTERM': False,

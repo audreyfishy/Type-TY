@@ -1,58 +1,62 @@
 import re
+from testApp.functions.debug import *
+from testApp.classes.video import Video
 
-# Re Compiler ==================================================================
-p = re.compile(r'https:\/\/www\.youtube\.com\/(watch\?v=|shorts\/)(.{11})')
-# ==============================================================================
-
-async def getData(page, num):
+async def getData(page, num, result):
+    lengthOfList = str(len(result))
     getDataScript = """() =>{
         let arr = document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer");
         rtn = [];
-        count = 0;
-        for(let e of arr){
-            if(count >= """+num+""")
-                break;
-            rtn.push(e.href);
-            count++;
-        }
+        for(let i = """+lengthOfList+"""; i < arr.length && i < """+num+"""; i++)
+            rtn.push(arr[i].href);
         return {"data": rtn};
     }
     """
-    return (await page.evaluate(getDataScript))["data"]
+    result.extend(list(map(getVideo, (await page.evaluate(getDataScript))["data"])))
+    return result
 
-async def waitForData(page, num):
-    await page.waitForFunction("""() => {
-        if(document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer").length > """+num+""")
-            return true;
-        arr = document.getElementsByClassName("style-scope ytd-message-renderer");
-        for(let e of arr){
-            try{
-                if(e.id == "message")
-                    return true;
+async def waitForData(page, num, result):
+    if not result:
+        await page.waitForFunction("""() => {
+            if(document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer").length)
+                return true;
+            arr = document.getElementsByClassName("style-scope ytd-message-renderer");
+            for(let e of arr){
+                try{
+                    if(e.id == "message")
+                        return true;
+                }
+                catch(e){
+                    continue;
+                }
             }
-            catch(e){
-                continue;
-            }
+            window.scrollBy(0, 1000);
+            return false;
         }
-        window.scrollBy(0, 10000);
-        return false;
-    }
-    """)
-
-async def loadMore(page):
-    loadMoreScript = """
-        function(){
-            window.scrollBy(0, 10000);
+        """)
+    else:
+        await page.waitForFunction("""() => {
+            if(document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer").length > """+num+""")
+                return true;
+            var elm = document.documentElement;
+            var currentHeight = elm.scrollHeight;
+            var bottom = currentHeight - elm.clientHeight;
+            window.scroll(0, bottom);
+            window.scroll(0, bottom);
+            window.scroll(0, bottom);
+            if(currentHeight === elm.scrollHeight)
+                return true;
+            return false;
         }
-        """
-    await page.evaluate(loadMoreScript)
+        """)
 
 def getVideoListURL(id):
     return f"https://www.youtube.com/channel/{id}/videos"
 
-def getVideoOriginalURL(temp : str):
+def getVideo(temp : str):
+    p = re.compile(r'https:\/\/www\.youtube\.com\/(watch\?v=|shorts\/)(.{11})')
     try:
-        return p.match(temp).groups()[1]
+        return Video(p.match(temp).groups()[1]).toString()
     except:
         print(f"{temp} is not a valid URL")
         return -1

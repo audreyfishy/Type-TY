@@ -1,3 +1,4 @@
+from glob import glob
 from django.shortcuts import render
 from django.http import HttpResponse
 from testApp.functions.debug import *
@@ -11,15 +12,17 @@ def index(request):
 
 @printTime
 def form(request):
+    global sessionSet
     sessionID = request.session.session_key
     id, numOfVideos= request.body.decode("utf-8").split("&")
-    test(id, numOfVideos)
     if not sessionID:
         request.session.create()
+        sessionID = request.session.session_key
     if not sessionID in sessionSet:
         sessionSet[sessionID] = sessionInfo()
     if sessionSet[sessionID].check():
         return HttpResponse(status=429)
+    test(id, numOfVideos, sessionID, len(sessionSet))
     return HttpResponse(json.dumps(sessionSet[sessionID].getData(id, numOfVideos)))
 
 @printTime

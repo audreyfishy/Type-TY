@@ -3,7 +3,7 @@ function test(token){
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'form', true);
     xhr.setRequestHeader('X-CSRFToken', token);
-    currentNumOfVideos += 10;
+    currentNumOfVideos += 30;
     xhr.send(document.getElementById("youtubeID").value + "&" + currentNumOfVideos);
     xhr.onreadystatechange = () => {
         if (xhr.readyState != 4) return;

@@ -17,6 +17,7 @@ async def getData(page, num, result):
 
 async def waitForData(page, num, result):
     if not result:
+        print("kotti")
         await page.waitForFunction("""() => {
             if(document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer").length)
                 return true;
@@ -30,20 +31,18 @@ async def waitForData(page, num, result):
                     continue;
                 }
             }
-            window.scrollBy(0, 1000);
             return false;
         }
         """)
     else:
-        await page.waitForFunction("""() => {
-            if(document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer").length > """+num+""")
-                return true;
+        await page.waitForFunction("""async function(){
             var elm = document.documentElement;
             var currentHeight = elm.scrollHeight;
             var bottom = currentHeight - elm.clientHeight;
             window.scroll(0, bottom);
-            window.scroll(0, bottom);
-            window.scroll(0, bottom);
+            if(document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer").length > """+num+""")
+                return true;
+            await new Promise(resolve => setTimeout(resolve, 100));
             if(currentHeight === elm.scrollHeight)
                 return true;
             return false;

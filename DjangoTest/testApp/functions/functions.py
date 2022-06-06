@@ -17,7 +17,6 @@ async def getData(page, num, result):
 
 async def waitForData(page, num, result):
     if not result:
-        print("kotti")
         await page.waitForFunction("""() => {
             if(document.getElementsByClassName("yt-simple-endpoint style-scope ytd-grid-video-renderer").length)
                 return true;
@@ -25,6 +24,16 @@ async def waitForData(page, num, result):
             for(let e of arr){
                 try{
                     if(e.id == "message")
+                        return true;
+                }
+                catch(e){
+                    continue;
+                }
+            }
+            arr = document.getElementsByClassName("ERROR style-scope yt-alert-renderer");
+            for(let e of arr){
+                try{
+                    if(e.id == "container")
                         return true;
                 }
                 catch(e){

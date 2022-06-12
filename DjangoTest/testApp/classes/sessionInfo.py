@@ -6,6 +6,7 @@ class sessionInfo:
     # Variables ================================================================
     # id : str
     # result : list
+    # numOfVideos : int
     # page : pyppeteer.page.Page
     # loop : asyncio.events.AbstractEventLoop
     # ==========================================================================
@@ -20,6 +21,7 @@ class sessionInfo:
             self.page = await self.browser.newPage()
 
         self.id = ""
+        self.numOfVideos = 10
         self.loop = asyncio.new_event_loop()
         self.loop.run_until_complete(initHelper(self))
 
@@ -33,13 +35,15 @@ class sessionInfo:
         self.result = []
         self.loop.run_until_complete(getPageHelper(self))
 
-    def getData(self, id, numOfVideos):
-        async def getDataHelper(self, numOfVideos):
-            await f.waitForData(self.page, numOfVideos, self.result)
-            return await f.getData(self.page, numOfVideos, self.result)
+    def getData(self, id):
+        async def getDataHelper(self):
+            await f.waitForData(self.page, self.numOfVideos, self.result)
+            rtn = await f.getData(self.page, self.numOfVideos, self.result)
+            self.numOfVideos += 10
+            return rtn
 
         self.getPage(id)
-        return self.loop.run_until_complete(getDataHelper(self, numOfVideos))
+        return self.loop.run_until_complete(getDataHelper(self))
 
     def check(self):
         return self.loop.is_running()

@@ -1,5 +1,4 @@
 from testApp.functions import functions as f
-from testApp.classes.video import Video
 from pyppeteer import launch
 import asyncio
 

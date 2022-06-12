@@ -44,7 +44,7 @@ async def waitForData(page, num, result):
         }
         """)
     else:
-        await page.waitForFunction("""async function(){
+        await page.waitForFunction("""() => {
             var elm = document.documentElement;
             var currentHeight = elm.scrollHeight;
             var bottom = currentHeight - elm.clientHeight;

@@ -45,9 +45,6 @@ class sessionInfo:
         self.getPage(id)
         return self.loop.run_until_complete(getDataHelper(self))
 
-    def check(self):
-        return self.loop.is_running()
-
     def __del__(self):
         async def delHelper(self):
             await self.browser.close()

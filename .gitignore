@@ -68,3 +68,5 @@ node_modules/
 *.pyc
 *.sqlite3
 DjangoTest/testSite/settings.py
+test.png
+test.py
